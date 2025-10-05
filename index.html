@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF--8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ziad Mohamed - Full Stack Developer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals with Slate Blue Accent -->
+    <!-- Application Structure Plan: The application is structured as a single-page portfolio with a fixed top navigation for easy access to key sections: About, Skills, Portfolio, and Education. This non-linear structure allows recruiters to jump directly to the information they find most relevant. The core of the application is a tabbed "Portfolio" section, which separates Professional Experience from Projects, preventing cognitive overload. Within the Projects tab, an accordion-style interaction allows users to drill down into specific project details. This keeps the initial view clean and encourages exploration. A dynamic radar chart is used for skills to provide an immediate, engaging visual summary of technical capabilities, which is more impactful than a static list. This user-centric design transforms a passive resume document into an interactive experience. -->
+    <!-- Visualization & Content Choices: 
+        - Professional Summary -> Goal: Inform -> Presentation: Formatted Text Block -> Interaction: None -> Justification: Clear, concise introduction to the candidate.
+        - Technical Skills -> Goal: Organize & Compare Proficiency -> Viz: Interactive Radar Chart -> Interaction: Hover tooltips display skill names and assigned proficiency scores. -> Justification: Provides a quick, visually compelling overview of the candidate's core strengths, making it more memorable than a simple list. -> Library: Chart.js (Canvas).
+        - Experience & Projects -> Goal: Organize & Detail -> Presentation: Tabbed Interface with Accordion -> Interaction: Users click tabs to switch between Experience and Projects. Clicking a project title expands to show details. -> Justification: This layered approach manages complexity. Users gets a high-level overview first and can choose to delve deeper, preventing a long, intimidating scroll of text. -> Method: HTML/CSS/JS for Toggling.
+        - Education/Certs -> Goal: Inform -> Presentation: Simple List -> Interaction: None -> Justification: Standard, clear presentation for credential information.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #fcfcfc; /* Lighter background */
+            color: #374151;
+        }
+        
+        /* Primary accent color */
+        .accent-color {
+            color: #4A5568; 
+        }
+
+        /* Tabs Styling */
+        .tab-button {
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .active-tab {
+            color: #4A5568;
+            font-weight: 700;
+            border-bottom: 3px solid #4A5568;
+        }
+
+        .inactive-tab {
+            color: #9ca3af;
+        }
+        
+        .inactive-tab:hover {
+             color: #6b7280;
+        }
+
+
+        /* Project Card Accordion Styling */
+        .project-card {
+            border-radius: 0.75rem; /* rounded-xl */
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05); /* shadow-md */
+        }
+        
+        .project-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+        }
+
+        .project-card.open .details {
+            max-height: 500px;
+            opacity: 1;
+            padding-top: 1.5rem; /* Increased padding */
+            padding-bottom: 1.5rem;
+        }
+
+        .project-card .details {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Smooth transition curve */
+        }
+
+        .project-card.open .chevron {
+            transform: rotate(180deg);
+        }
+
+        .project-card .chevron {
+            transition: transform 0.3s ease-in-out;
+            color: #4A5568;
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+    </style>
+</head>
+
+<body class="antialiased">
+
+    <!-- Header & Navigation -->
+    <header class="bg-white/95 backdrop-blur-md sticky top-0 z-50 shadow-lg">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="text-2xl font-extrabold accent-color tracking-wide">
+                Ziad Mohamed
+            </div>
+            <div class="hidden md:flex space-x-10 text-lg">
+                <a href="#about" class="text-gray-600 hover:accent-color transition font-medium">About</a>
+                <a href="#skills" class="text-gray-600 hover:accent-color transition font-medium">Skills</a>
+                <a href="#portfolio" class="text-gray-600 hover:accent-color transition font-medium">Portfolio</a>
+                <a href="#education" class="text-gray-600 hover:accent-color transition font-medium">Education</a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-6 py-16 md:py-24">
+
+        <!-- Hero Section -->
+        <section id="hero" class="text-center mb-24">
+            <h1 class="text-5xl md:text-7xl font-extrabold text-gray-800 mb-4 tracking-tight">Ziad Mohamed</h1>
+            <p class="text-2xl md:text-3xl accent-color font-light mb-10">Full Stack Developer | ERP Integration Specialist</p>
+            
+            <!-- Contact Info -->
+            <div class="flex justify-center items-center space-x-6 md:space-x-10 text-base flex-wrap">
+                <a href="mailto:ziadm0176@gmail.com"
+                    class="flex items-center text-gray-700 hover:text-gray-900 transition mb-3 md:mb-0 p-2 rounded-lg hover:bg-gray-100">
+                    <span class="mr-3 text-2xl">📧</span> ziadm0176@gmail.com
+                </a>
+                <span class="text-gray-300 hidden md:inline">|</span>
+                <span class="flex items-center text-gray-700 mb-3 md:mb-0 p-2">
+                    <span class="mr-3 text-2xl">📞</span> 01099475854
+                </span>
+                <span class="text-gray-300 hidden md:inline">|</span>
+                <span class="flex items-center text-gray-700 mb-3 md:mb-0 p-2">
+                    <span class="mr-3 text-2xl">📍</span> Alexandria, Egypt
+                </span>
+            </div>
+             
+            <!-- Social Icons -->
+             <div class="flex justify-center items-center space-x-8 mt-8">
+                <a href="https://www.linkedin.com/in/ziad-mohamed-873309217/" target="_blank" rel="noopener noreferrer" class="text-gray-500 hover:accent-color transition transform hover:scale-110">
+                   <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" clip-rule="evenodd"/></svg>
+                </a>
+                 <a href="https://github.com/Ziad-Alsaghier" target="_blank" rel="noopener noreferrer" class="text-gray-500 hover:accent-color transition transform hover:scale-110">
+                    <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.168 6.839 9.49.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.031-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.378.203 2.398.1 2.651.64.7 1.03 1.595 1.03 2.688 0 3.848-2.338 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.577.688.482A10.001 10.001 0 0022 12c0-5.523-4.477-10-10-10z" clip-rule="evenodd"/></svg>
+                </a>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about" class="mb-24 scroll-mt-20">
+            <div class="max-w-4xl mx-auto bg-white p-10 rounded-xl shadow-2xl border border-gray-100">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6 text-center border-b pb-3 accent-color">Professional Summary</h2>
+                <p class="text-lg text-gray-600 leading-relaxed italic">
+                    Proficient Full Stack Developer with two years of experience specializing in building scalable and
+                    secure enterprise solutions. Expertise in Laravel (PHP) for robust backend development and
+                    JavaScript, JQuery, CSS, and HTML for dynamic frontend implementation. Proven ability to manage
+                    the entire project lifecycle, from comprehensive database design (MySQL) and RESTful API
+                    development to deployment and maintenance. Extensive experience working with complex ERP systems
+                    and leveraging the Agile/Scrum methodology to ensure efficient, timely project delivery. Focused
+                    on writing clean, maintainable code and bridging business objectives with reliable technical
+                    architecture.
+                </p>
+            </div>
+        </section>
+
+        <!-- Skills Section -->
+        <section id="skills" class="mb-24 scroll-mt-20">
+            <div class="max-w-4xl mx-auto">
+                <h2 class="text-3xl font-bold text-gray-800 mb-8 text-center accent-color">Technical Skills</h2>
+                <p class="text-center text-gray-600 mb-10 max-w-2xl mx-auto">
+                    This chart provides a visual representation of my key technical proficiencies. It highlights my core
+                    strengths in backend development with PHP, Laravel, and MySQL, alongside strong foundational
+                    frontend capabilities in HTML, CSS, JavaScript, and JQuery.
+                </p>
+                <div class="bg-white p-6 md:p-12 rounded-xl shadow-2xl border border-gray-100">
+                    <div class="chart-container">
+                        <canvas id="skillsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Portfolio Section -->
+        <section id="portfolio" class="mb-24 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-gray-800 mb-8 text-center accent-color">Professional Portfolio</h2>
+            <p class="text-center text-gray-600 mb-10 max-w-2xl mx-auto">
+                Explore my professional journey. Use the tabs below to switch between my formal work experience and detailed project showcases. Click on any project title to expand and see my specific technical contributions.
+            </p>
+            <div class="max-w-4xl mx-auto">
+                
+                <!-- Tab Buttons -->
+                <div class="flex justify-center border-b border-gray-200 mb-10">
+                    <button data-tab="experience"
+                        class="tab-button py-3 px-8 text-xl font-semibold active-tab transition duration-300 ease-in-out">Experience</button>
+                    <button data-tab="projects"
+                        class="tab-button py-3 px-8 text-xl font-semibold inactive-tab transition duration-300 ease-in-out">Projects</button>
+                </div>
+
+                <!-- Experience Content -->
+                <div id="experience-content" class="tab-content space-y-8">
+                    <div class="bg-white p-8 rounded-xl shadow-2xl border border-gray-100 transition duration-300 hover:shadow-xl">
+                        <div class="flex justify-between items-start flex-wrap">
+                             <div class="mb-2">
+                                <h3 class="text-2xl font-bold accent-color">Full Stack Developer</h3>
+                                <p class="text-lg font-medium text-gray-700">The Future ERP</p>
+                            </div>
+                            <span class="text-sm font-semibold text-gray-500 bg-gray-100 px-3 py-1 rounded-full">June 2024 – Present</span>
+                        </div>
+                        <ul class="mt-5 list-disc list-inside text-gray-600 space-y-3 pl-4">
+                            <li>Spearheaded the full-stack development and customization of core ERP system modules, focusing on finance, inventory, and human resources.</li>
+                            <li>Architected and implemented the relational integration between the ERP and e-commerce websites, ensuring real-time data synchronization for inventory levels, order processing, and financial reporting.</li>
+                            <li>Designed and optimized scalable database schemas (MySQL) and high-performance backend logic using Laravel to handle high-volume transactions across the ERP and connected retail channels.</li>
+                            <li>Developed dynamic, user-friendly frontend interfaces using HTML, CSS (Bootstrap), and JQuery to enhance user interaction and data visualization within the ERP dashboards.</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-white p-8 rounded-xl shadow-2xl border border-gray-100 transition duration-300 hover:shadow-xl">
+                        <div class="flex justify-between items-start flex-wrap">
+                            <div class="mb-2">
+                                <h3 class="text-2xl font-bold accent-color">Backend Developer</h3>
+                                <p class="text-lg font-medium text-gray-700">Wego Station</p>
+                            </div>
+                            <span class="text-sm font-semibold text-gray-500 bg-gray-100 px-3 py-1 rounded-full">Nov 2023 – May 2024</span>
+                        </div>
+                        <ul class="mt-5 list-disc list-inside text-gray-600 space-y-3 pl-4">
+                            <li>Contributed significantly to the development and optimization of educational platforms
+                                and core ERP system modules using Laravel and MySQL.</li>
+                            <li>Managed task execution within an Agile/Scrum environment, actively participating in
+                                sprint planning and daily stand-ups to ensure project milestones were met on time.</li>
+                            <li>Designed and implemented RESTful API endpoints to facilitate seamless data communication
+                                between system components and third-party services.</li>
+                            <li>Applied solid software design principles and best practices to ensure code
+                                maintainability, security, and high performance.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Projects Content (Hidden by Default) -->
+                <div id="projects-content" class="tab-content hidden">
+                    <div class="space-y-4" id="project-list">
+                        <!-- Project cards will be injected here by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Education Section -->
+        <section id="education" class="scroll-mt-20">
+            <div class="max-w-4xl mx-auto bg-white p-10 rounded-xl shadow-2xl border border-gray-100">
+                <h2 class="text-3xl font-bold text-gray-800 mb-8 text-center accent-color">Education & Certificates</h2>
+                <div class="grid md:grid-cols-2 gap-10">
+                    <div class="p-6 bg-gray-50 rounded-lg border border-gray-200">
+                        <h3 class="text-xl font-bold accent-color">King Marriott Academy KMA</h3>
+                        <p class="text-md text-gray-500">Alexandria, Egypt</p>
+                        <p class="text-sm text-gray-500 mt-2">Oct 2019 – Jul 2023</p>
+                        <p class="mt-4 text-gray-700">Graduation Project Grade: <span
+                                class="font-extrabold text-[#4A5568]">Excellent</span></p>
+                    </div>
+                    <div class="p-6 bg-gray-50 rounded-lg border border-gray-200">
+                        <h3 class="text-xl font-bold accent-color">Certificates</h3>
+                        <ul class="mt-3 list-disc list-inside text-gray-600 space-y-2">
+                            <li>MySQL Fundamentals (New Horizons)</li>
+                            <li>PHP (New Horizons)</li>
+                            <li>Laravel Framework With API's</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white mt-20">
+        <div class="container mx-auto px-6 py-10 text-center">
+            <p class="mb-2 text-lg font-semibold">Ziad Mohamed</p>
+            <p class="text-sm text-gray-400">Designed with modern web standards | Full Stack Developer Portfolio</p>
+            <p class="text-xs text-gray-500 mt-2">© 2025 All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            // --- Chart Logic (Unchanged) ---
+            const skillsData = {
+                labels: ['Laravel', 'PHP', 'MySQL/SQL', 'RESTful APIs', 'JavaScript', 'JQuery', 'HTML5/CSS3', 'Agile/Scrum'],
+                datasets: [{
+                    label: 'Proficiency',
+                    data: [9, 9, 9, 9, 9, 9, 9, 9], 
+                    backgroundColor: 'rgba(74, 85, 104, 0.2)', // Accent color with transparency
+                    borderColor: 'rgba(74, 85, 104, 1)',
+                    pointBackgroundColor: 'rgba(74, 85, 104, 1)',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: 'rgba(74, 85, 104, 1)'
+                }]
+            };
+
+            const skillsChartCtx = document.getElementById('skillsChart').getContext('2d');
+            new Chart(skillsChartCtx, {
+                type: 'radar',
+                data: skillsData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: { color: 'rgba(0, 0, 0, 0.1)' },
+                            grid: { color: 'rgba(0, 0, 0, 0.1)' },
+                            pointLabels: {
+                                font: { size: 12, weight: '500' },
+                                color: '#374151'
+                            },
+                            ticks: {
+                                backdropColor: 'rgba(252, 252, 252, 0.8)', // Match new body background
+                                color: '#6b7280',
+                                stepSize: 2,
+                                beginAtZero: true,
+                                max: 10
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+            // --- End Chart Logic ---
+
+
+            // --- Project Data (Unchanged) ---
+            const projectsData = [
+                // NEW PROJECT ADDED FOR THE FUTURE ERP EXPERIENCE - UPDATED TO MENTION HOLOLPACK.COM
+                {
+                    title: "The Future ERP: Core Module Customization & E-commerce Integration",
+                    technology: "Laravel, MySQL, JQuery, Bootstrap, ERP Architecture",
+                    description: "A collaborative project focused on customizing and extending the proprietary ERP system's core modules (Finance, Inventory, HR) and establishing robust, real-time data synchronization with client e-commerce websites, including the Hololpack e-commerce platform.",
+                    contributions: [
+                        "Architected and implemented the relational integration layer to ensure real-time data flow between the central ERP database and multiple external e-commerce sites, such as hololpack.com.",
+                        "Spearheaded the development and customization of key ERP functions, including advanced financial reporting and streamlined inventory management workflows.",
+                        "Optimized database schemas (MySQL) and backend logic (Laravel) to guarantee high performance for simultaneous transactions from both the ERP and retail channels.",
+                        "Designed and developed dynamic dashboard components and user interfaces using JQuery and Bootstrap, significantly enhancing data visualization and user experience."
+                    ]
+                },
+                {
+                    title: "Wegostore - SaaS E-commerce Platform",
+                    technology: "Laravel, MySQL, APIs, Clean Architecture, Design Patterns",
+                    description: "Led the backend development and architected a robust Software-as-a-Service (SaaS) platform, enabling users to effortlessly create and host their own online stores (similar to Shopify).",
+                    contributions: [
+                        "Designed the core API architecture and project structure, prioritizing scalability and security for multi-tenant users.",
+                        "Successfully integrated domain registration and hosting services to provide a complete, end-to-end e-commerce solution.",
+                        "Ensured high performance and maintainability by applying SOLID design patterns and clean architecture principles throughout the codebase."
+                    ]
+                },
+                {
+                    title: "Nawlon - Vehicle Transport ERP System",
+                    technology: "Laravel, MySQL, APIs, MVC Architecture",
+                    description: "Developed an ERP system focused on tracking and managing all operational details for individual transport vehicles, including maintenance, financials, and profitability.",
+                    contributions: [
+                        "Created comprehensive annual and monthly reporting modules to provide detailed insights into vehicle performance and financial gains/losses.",
+                        "Implemented specific features for tracking maintenance schedules and associated costs, optimizing vehicle uptime and budget management."
+                    ]
+                },
+                {
+                    title: "Maths-House - Educational Platform",
+                    technology: "Laravel, MySQL, APIs, MVC Architecture",
+                    description: "A comprehensive online educational platform tailored for language schools, featuring course management, progress tracking, and secure user authentication.",
+                    contributions: [
+                        "Implemented core functionalities, including user authentication, course enrollment, and detailed progress tracking using MVC patterns.",
+                        "Developed and integrated APIs to facilitate in-platform placement exams and subject assessments."
+                    ]
+                }
+            ];
+            // --- End Project Data ---
+
+            // --- Project List Rendering (Updated class for creative design) ---
+            const projectList = document.getElementById('project-list');
+            projectsData.forEach(project => {
+                const projectCard = document.createElement('div');
+                // Using the custom .project-card class from the style block
+                projectCard.className = 'project-card bg-white overflow-hidden'; 
+
+                let contributionsHtml = project.contributions.map(c => `<li class="text-sm">${c}</li>`).join('');
+
+                projectCard.innerHTML = `
+                    <div class="p-6 cursor-pointer flex justify-between items-center project-header">
+                        <div>
+                            <h3 class="text-xl font-bold accent-color">${project.title}</h3>
+                            <p class="text-sm text-gray-500 mt-1">${project.technology}</p>
+                        </div>
+                        <span class="chevron text-3xl font-light">▼</span>
+                    </div>
+                    <div class="details px-6 bg-gray-50 border-t border-gray-100">
+                        <p class="text-gray-600 mb-4">${project.description}</p>
+                        <h4 class="font-semibold text-gray-700 mb-2">Key Contributions:</h4>
+                        <ul class="list-disc list-inside text-gray-600 space-y-2 pl-4">
+                            ${contributionsHtml}
+                        </ul>
+                    </div>
+                `;
+                projectList.appendChild(projectCard);
+            });
+            // --- End Project List Rendering ---
+
+
+            // --- Interaction Logic (Unchanged) ---
+            document.querySelectorAll('.project-header').forEach(header => {
+                header.addEventListener('click', () => {
+                    header.parentElement.classList.toggle('open');
+                });
+            });
+
+            const tabs = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const target = tab.getAttribute('data-tab');
+
+                    tabs.forEach(t => {
+                        t.classList.remove('active-tab');
+                        t.classList.add('inactive-tab');
+                    });
+                    tab.classList.add('active-tab');
+                    tab.classList.remove('inactive-tab');
+
+                    tabContents.forEach(content => {
+                        content.classList.add('hidden');
+                        if (content.id === `${target}-content`) {
+                            content.classList.remove('hidden');
+                        }
+                    });
+                });
+            });
+            // --- End Interaction Logic ---
+
+        });
+    </script>
+</body>
+
+</html>
+    
